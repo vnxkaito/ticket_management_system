@@ -16,6 +16,7 @@ A ticket management system for customer support. An end user will raise a ticket
 - As a user, I want to reset my password using a secure token so that I can recover my account.
 #### Admin
 - As an admin, I want to activate or deactivate user accounts so that I can control system access.
+##### Anything above this line should be finished before ( Friday | 3-4-2026 )
 - As an admin, I want to assign roles to users so that permissions are managed correctly.
 
 ## User, Role, and Team Managment
@@ -38,18 +39,40 @@ A ticket management system for customer support. An end user will raise a ticket
 
 ## Ticket Workflow
 
+##### Anything above this line should be finished before ( Saturday | 4-4-2026 )
+
 ## SLA Monitoring
+
+## Security & Access Control
+#### Customer
+- As a customer, I want to acess only my own tickets so that my data remains private.
+#### Supervisor
+- As a supervisor, I want broader access to team tickets so that I can manage operations.
+#### Admin
+- As an admin, I want full access to system management features so that I can administer the platform.
+
+
 
 ## Notifications
 
 ## Audit Trail
 
+##### Anything above this line should be finished before ( Sunday | 5-4-2026 )
+
 ## Realtime updates
 
 ## Reporting & Dashboards
 
+
 ## Load & Reliability
 
+##### Anything above this line should be finished before ( Wednesday | 8-4-2026 )
+
+#### if progress matched the plan
+- Create frontend (Thursday, Friday, and Saturday)
+- Run the project on an AWS EC2 instance ( Saturday )
+- Enhance the API endpoints ( Saturday and Sunday )
+- Prepare presentation
 
 
 
