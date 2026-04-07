@@ -2,8 +2,8 @@ package com.ga.tms.security;
 
 import com.ga.tms.auth.model.LoginRequest;
 import com.ga.tms.auth.model.LoginResponse;
-import com.ga.tms.auth.model.User;
 import com.ga.tms.exceptions.InformationExistException;
+import com.ga.tms.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;

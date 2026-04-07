@@ -1,6 +1,6 @@
 package com.ga.tms.security;
 
-import com.ga.tms.auth.model.User;
+import com.ga.tms.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.security.core.userdetails.UserDetails;
