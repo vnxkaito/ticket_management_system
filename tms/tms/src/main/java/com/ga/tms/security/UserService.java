@@ -57,8 +57,9 @@ public class UserService {
     public ResponseEntity<?> loginUser(LoginRequest loginRequest){
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPasswordhash());
         try {
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            myUserDetails = (MyUserDetails) authenticationToken.getPrincipal();
+            var authentication = authenticationManager.authenticate(authenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            myUserDetails = (MyUserDetails) authentication.getPrincipal();
             final String JWT = jwtUtils.generateJwtToken(myUserDetails);
             return ResponseEntity.ok(new LoginResponse(JWT));
         } catch (Exception e) {
