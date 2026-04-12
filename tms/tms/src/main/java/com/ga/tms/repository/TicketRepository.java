@@ -1,4 +1,7 @@
 package com.ga.tms.repository;
 
-public interface TicketRepository {
+import com.ga.tms.model.Ticket;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface TicketRepository extends JpaRepository<Ticket, Long> {
 }
