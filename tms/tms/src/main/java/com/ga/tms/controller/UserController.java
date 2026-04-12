@@ -5,10 +5,7 @@ import com.ga.tms.model.User;
 import com.ga.tms.security.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth/users")
@@ -29,5 +26,15 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         return userService.loginUser(loginRequest);
+    }
+
+    @GetMapping("/verify/{token}")
+    public ResponseEntity<String> verify(@PathVariable String token) {
+        System.out.println("Controller calling verify()");
+        if(userService.verify(token)){
+            return ResponseEntity.ok("Email verified successfully");
+        }else {
+            return ResponseEntity.ok("Email verification failed");
+        }
     }
 }
