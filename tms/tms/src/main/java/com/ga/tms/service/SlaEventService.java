@@ -1,5 +1,6 @@
 package com.ga.tms.service;
 
+import com.ga.tms.exceptions.InformationNotFoundException;
 import com.ga.tms.model.SlaEvent;
 import com.ga.tms.model.Ticket;
 import com.ga.tms.repository.SlaEventRepository;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class SlaEventService {
@@ -25,6 +27,39 @@ public class SlaEventService {
                 .status("PENDING")
                 .build();
         return slaEventRepository.save(slaEvent);
+    }
+
+    public List<SlaEvent> getSlaEventsByTicket(Long ticketId) {
+        return slaEventRepository.findByTicketId(ticketId);
+    }
+
+    public List<SlaEvent> getPendingSlaEvents() {
+        return slaEventRepository.findByStatus("PENDING");
+    }
+
+    public List<SlaEvent> getBreachedSlaEvents() {
+        return slaEventRepository.findByStatusAndDueAtBefore("PENDING", LocalDateTime.now());
+    }
+
+    public SlaEvent markAsProcessed(Long slaEventId) {
+        SlaEvent slaEvent = slaEventRepository.findById(slaEventId)
+                .orElseThrow(() -> new InformationNotFoundException("SLA event with id " + slaEventId + " not found."));
+        slaEvent.setStatus("PROCESSED");
+        slaEvent.setProcessedAt(LocalDateTime.now());
+        return slaEventRepository.save(slaEvent);
+    }
+
+    public SlaEvent markAsBreached(Long slaEventId) {
+        SlaEvent slaEvent = slaEventRepository.findById(slaEventId)
+                .orElseThrow(() -> new InformationNotFoundException("SLA event with id " + slaEventId + " not found."));
+        slaEvent.setStatus("BREACHED");
+        slaEvent.setProcessedAt(LocalDateTime.now());
+        return slaEventRepository.save(slaEvent);
+    }
+
+    public SlaEvent getSlaEventById(Long id) {
+        return slaEventRepository.findById(id)
+                .orElseThrow(() -> new InformationNotFoundException("SLA event with id " + id + " not found."));
     }
 
 }
