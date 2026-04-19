@@ -26,5 +26,10 @@ public class AuditTrailController {
         return ResponseEntity.ok(ticketAuditEventService.getAuditTrailByTicket(ticketId));
     }
 
+    @GetMapping("/actors/{actorId}")
+    public ResponseEntity<List<TicketAuditEvent>> getEventsByActor(@PathVariable Long actorId) {
+        return ResponseEntity.ok(ticketAuditEventService.getEventsByActor(actorId));
+    }
+
 
 }
