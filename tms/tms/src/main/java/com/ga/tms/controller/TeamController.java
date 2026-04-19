@@ -49,5 +49,10 @@ public class TeamController {
         return ResponseEntity.ok(teamService.addUserToTeam(teamId, userId));
     }
 
+    @DeleteMapping("/{teamId}/members/{userId}")
+    public ResponseEntity<Team> removeUserFromTeam(@PathVariable Long teamId, @PathVariable Long userId) {
+        return ResponseEntity.ok(teamService.removeUserFromTeam(teamId, userId));
+    }
+
 
 }
