@@ -4,10 +4,12 @@ import com.ga.tms.model.Team;
 import com.ga.tms.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Controller
 public class TeamController {
     private final TeamService teamService;
 
@@ -34,6 +36,12 @@ public class TeamController {
     @PutMapping("/{id}")
     public ResponseEntity<Team> updateTeam(@PathVariable Long id, @RequestBody Team team) {
         return ResponseEntity.ok(teamService.updateTeam(id, team));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteTeam(@PathVariable Long id) {
+        teamService.deleteTeam(id);
+        return ResponseEntity.ok("Team deleted successfully.");
     }
 
 
