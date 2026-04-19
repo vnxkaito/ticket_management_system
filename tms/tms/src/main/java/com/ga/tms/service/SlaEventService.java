@@ -12,14 +12,15 @@ import java.util.List;
 
 @Service
 public class SlaEventService {
+
     private final SlaEventRepository slaEventRepository;
 
     @Autowired
-    public SlaEventService(SlaEventRepository slaEventRepository){
+    public SlaEventService(SlaEventRepository slaEventRepository) {
         this.slaEventRepository = slaEventRepository;
     }
 
-    public SlaEvent createSlaEvent(Ticket ticket, String eventType, LocalDateTime dueAt){
+    public SlaEvent createSlaEvent(Ticket ticket, String eventType, LocalDateTime dueAt) {
         SlaEvent slaEvent = SlaEvent.builder()
                 .ticket(ticket)
                 .eventType(eventType)
@@ -43,7 +44,7 @@ public class SlaEventService {
 
     public SlaEvent markAsProcessed(Long slaEventId) {
         SlaEvent slaEvent = slaEventRepository.findById(slaEventId)
-                .orElseThrow(() -> new InformationNotFoundException("SLA event with id " + slaEventId + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("SLA event " + slaEventId + " not found"));
         slaEvent.setStatus("PROCESSED");
         slaEvent.setProcessedAt(LocalDateTime.now());
         return slaEventRepository.save(slaEvent);
@@ -51,7 +52,7 @@ public class SlaEventService {
 
     public SlaEvent markAsBreached(Long slaEventId) {
         SlaEvent slaEvent = slaEventRepository.findById(slaEventId)
-                .orElseThrow(() -> new InformationNotFoundException("SLA event with id " + slaEventId + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("Couldn't find SLA event with id " + slaEventId));
         slaEvent.setStatus("BREACHED");
         slaEvent.setProcessedAt(LocalDateTime.now());
         return slaEventRepository.save(slaEvent);
@@ -59,7 +60,6 @@ public class SlaEventService {
 
     public SlaEvent getSlaEventById(Long id) {
         return slaEventRepository.findById(id)
-                .orElseThrow(() -> new InformationNotFoundException("SLA event with id " + id + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("No SLA event found with id " + id));
     }
-
 }

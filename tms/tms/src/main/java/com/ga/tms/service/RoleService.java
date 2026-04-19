@@ -36,12 +36,12 @@ public class RoleService {
 
     public Role getRoleById(Long id) {
         return roleRepository.findById(id)
-                .orElseThrow(() -> new InformationNotFoundException("Role with id " + id + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("No role found with id " + id));
     }
 
     public Role getRoleByName(String name) {
         return roleRepository.findByName(name)
-                .orElseThrow(() -> new InformationNotFoundException("Role with name " + name + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("Role '" + name + "' not found"));
     }
 
     public Role updateRole(Long id, Role roleDetails) {
@@ -57,7 +57,7 @@ public class RoleService {
 
     public User assignRoleToUser(Long userId, Long roleId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new InformationNotFoundException("User with id " + userId + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("User " + userId + " not found"));
         Role role = getRoleById(roleId);
         user.getRoles().add(role);
         return userRepository.save(user);
@@ -65,7 +65,7 @@ public class RoleService {
 
     public User removeRoleFromUser(Long userId, Long roleId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new InformationNotFoundException("User with id " + userId + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("Couldn't find user with id " + userId));
         Role role = getRoleById(roleId);
         user.getRoles().remove(role);
         return userRepository.save(user);

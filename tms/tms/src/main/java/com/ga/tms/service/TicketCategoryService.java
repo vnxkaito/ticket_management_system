@@ -32,12 +32,12 @@ public class TicketCategoryService {
 
     public TicketCategory getCategoryById(Long id) {
         return ticketCategoryRepository.findById(id)
-                .orElseThrow(() -> new InformationNotFoundException("Category with id " + id + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("No category found with id " + id));
     }
 
     public TicketCategory getCategoryByName(String name) {
         return ticketCategoryRepository.findByName(name)
-                .orElseThrow(() -> new InformationNotFoundException("Category with name " + name + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("Category '" + name + "' doesn't exist"));
     }
 
     public TicketCategory updateCategory(Long id, TicketCategory categoryDetails) {

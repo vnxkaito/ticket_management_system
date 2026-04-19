@@ -56,7 +56,7 @@ public class NotificationJobService {
 
     public NotificationJob getJobById(Long id){
         return notificationJobRepository.findById(id)
-                .orElseThrow(() -> new InformationNotFoundException("Notification job with id " + id + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("Notification job " + id + " not found"));
     }
 
     public NotificationJob MarkAsSent(Long jobId){

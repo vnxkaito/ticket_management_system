@@ -7,15 +7,16 @@ import com.ga.tms.model.User;
 import com.ga.tms.repository.TicketCommentRepository;
 import com.ga.tms.repository.TicketRepository;
 import com.ga.tms.security.UserRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 public class TicketCommentService {
+
     private final TicketCommentRepository ticketCommentRepository;
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
@@ -25,7 +26,7 @@ public class TicketCommentService {
     public TicketCommentService(TicketCommentRepository ticketCommentRepository,
                                 TicketRepository ticketRepository,
                                 UserRepository userRepository,
-                                TicketAuditEventService ticketAuditEventService){
+                                TicketAuditEventService ticketAuditEventService) {
         this.ticketCommentRepository = ticketCommentRepository;
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
@@ -33,11 +34,11 @@ public class TicketCommentService {
     }
 
     @Transactional
-    public TicketComment addComment(Long ticketId, Long authorId, String body, String commentType, Boolean internalOnly){
+    public TicketComment addComment(Long ticketId, Long authorId, String body, String commentType, Boolean internalOnly) {
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new InformationNotFoundException("Ticket with ID " + ticketId + " not found.") );
+                .orElseThrow(() -> new InformationNotFoundException("No ticket found with id " + ticketId));
         User author = userRepository.findById(authorId)
-                .orElseThrow(() -> new InformationNotFoundException("Author with ID " + authorId + " not found"));
+                .orElseThrow(() -> new InformationNotFoundException("Author not found: " + authorId));
 
         TicketComment comment = TicketComment.builder()
                 .ticket(ticket)
@@ -51,27 +52,27 @@ public class TicketCommentService {
         TicketComment savedComment = ticketCommentRepository.save(comment);
 
         ticket.setUpdatedAt(LocalDateTime.now());
-        ticketRepository.save(ticket);
 
-        ticketAuditEventService.logEvent(ticket, "COMMENT_ADDED", author, null, "{\"comment\":" + savedComment.getId() + ",\"internalOnly\":" + internalOnly + "}", null);
+        String newVal = String.format("{\"commentId\":%d,\"internalOnly\":%b}", savedComment.getId(), internalOnly);
+        ticketAuditEventService.logEvent(ticket, "COMMENT_ADDED", author, null, newVal, null);
 
         return savedComment;
     }
 
-    public List<TicketComment> getCommentsByTicket(Long ticketId){
+    public List<TicketComment> getCommentsByTicket(Long ticketId) {
         return ticketCommentRepository.findByTicketId(ticketId);
     }
 
-    public List<TicketComment> getPublicCommentsByTicket(Long ticketId){
+    public List<TicketComment> getPublicCommentsByTicket(Long ticketId) {
         return ticketCommentRepository.findByTicketIdAndInternalOnly(ticketId, false);
     }
 
-    public List<TicketComment> getInternalCommentsByTicket(Long ticketId){
+    public List<TicketComment> getInternalCommentsByTicket(Long ticketId) {
         return ticketCommentRepository.findByTicketIdAndInternalOnly(ticketId, true);
     }
 
-    public TicketComment getCommentById(Long id){
+    public TicketComment getCommentById(Long id) {
         return ticketCommentRepository.findById(id)
-                .orElseThrow(() -> new InformationNotFoundException("comment with id " + id + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("Comment " + id + " doesn't exist"));
     }
 }

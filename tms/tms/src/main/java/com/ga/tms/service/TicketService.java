@@ -43,9 +43,9 @@ public class TicketService {
     @Transactional
     public Ticket createTicket(Long customerId, Long categoryId, String subject, String description) {
         User customer = userRepository.findById(customerId)
-                .orElseThrow(() -> new InformationNotFoundException("User with id " + customerId + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("Customer not found: " + customerId));
         TicketCategory category = ticketCategoryRepository.findById(categoryId)
-                .orElseThrow(() -> new InformationNotFoundException("Category with id " + categoryId + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("No category found with id " + categoryId));
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -70,19 +70,19 @@ public class TicketService {
         slaEventService.createSlaEvent(savedTicket, "FIRST_RESPONSE", savedTicket.getFirstResponseDueAt());
         slaEventService.createSlaEvent(savedTicket, "RESOLUTION", savedTicket.getResolutionDueAt());
 
-        ticketAuditEventService.logEvent(savedTicket, "CREATED", customer, null, null, null);
+        ticketAuditEventService.logEvent(savedTicket, "CREATED", customer); // no diffs on creation
 
         return savedTicket;
     }
 
     public Ticket getTicketById(Long id) {
         return ticketRepository.findById(id)
-                .orElseThrow(() -> new InformationNotFoundException("Ticket with id " + id + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("Ticket " + id + " not found"));
     }
 
     public Ticket getTicketByExternalRef(String externalRef) {
         return ticketRepository.findByExternalRef(externalRef)
-                .orElseThrow(() -> new InformationNotFoundException("Ticket with ref " + externalRef + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("No ticket found for ref: " + externalRef));
     }
 
     public List<Ticket> getTicketsByCustomer(Long customerId) {
@@ -121,15 +121,15 @@ public class TicketService {
     public Ticket assignTicketToAgent(Long ticketId, Long agentId, User actor) {
         Ticket ticket = getTicketById(ticketId);
         User agent = userRepository.findById(agentId)
-                .orElseThrow(() -> new InformationNotFoundException("User with id " + agentId + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("Agent not found: " + agentId));
 
         String oldAgent = ticket.getAssignedAgent() != null ? ticket.getAssignedAgent().getId().toString() : "null";
         ticket.setAssignedAgent(agent);
         ticket.setUpdatedAt(LocalDateTime.now());
 
-        ticketAuditEventService.logEvent(ticket, "ASSIGNED_AGENT", actor,
-                "{\"assignedAgentId\":" + oldAgent + "}",
-                "{\"assignedAgentId\":" + agentId + "}", null);
+        String oldAgentVal = String.format("{\"assignedAgentId\":%s}", oldAgent);
+        String newAgentVal = String.format("{\"assignedAgentId\":%d}", agentId);
+        ticketAuditEventService.logEvent(ticket, "ASSIGNED_AGENT", actor, oldAgentVal, newAgentVal, null);
 
         return ticketRepository.save(ticket);
     }
@@ -138,15 +138,15 @@ public class TicketService {
     public Ticket assignTicketToTeam(Long ticketId, Long teamId, User actor) {
         Ticket ticket = getTicketById(ticketId);
         Team team = teamRepository.findById(teamId)
-                .orElseThrow(() -> new InformationNotFoundException("Team with id " + teamId + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("No team with id " + teamId));
 
         String oldTeam = ticket.getAssignedTeam() != null ? ticket.getAssignedTeam().getId().toString() : "null";
         ticket.setAssignedTeam(team);
         ticket.setUpdatedAt(LocalDateTime.now());
 
-        ticketAuditEventService.logEvent(ticket, "ASSIGNED_TEAM", actor,
-                "{\"assignedTeamId\":" + oldTeam + "}",
-                "{\"assignedTeamId\":" + teamId + "}", null);
+        String oldTeamVal = String.format("{\"assignedTeamId\":%s}", oldTeam);
+        String newTeamVal = String.format("{\"assignedTeamId\":%d}", teamId);
+        ticketAuditEventService.logEvent(ticket, "ASSIGNED_TEAM", actor, oldTeamVal, newTeamVal, null);
 
         return ticketRepository.save(ticket);
     }
@@ -159,13 +159,13 @@ public class TicketService {
         }
 
         User agent = userRepository.findById(agentId)
-                .orElseThrow(() -> new InformationNotFoundException("User with id " + agentId + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("Agent " + agentId + " doesn't exist"));
 
         ticket.setAssignedAgent(agent);
         ticket.setUpdatedAt(LocalDateTime.now());
 
-        ticketAuditEventService.logEvent(ticket, "CLAIMED", agent, null,
-                "{\"assignedAgentId\":" + agentId + "}", null);
+        String claimVal = String.format("{\"assignedAgentId\":%d}", agentId);
+        ticketAuditEventService.logEvent(ticket, "CLAIMED", agent, null, claimVal, null);
 
         return ticketRepository.save(ticket);
     }
@@ -182,9 +182,9 @@ public class TicketService {
             ticket.setResolvedAt(LocalDateTime.now());
         }
 
-        ticketAuditEventService.logEvent(ticket, "STATUS_CHANGED", actor,
-                "{\"status\":\"" + oldStatus + "\"}",
-                "{\"status\":\"" + newStatus + "\"}", null);
+        String oldStatusVal = String.format("{\"status\":\"%s\"}", oldStatus);
+        String newStatusVal = String.format("{\"status\":\"%s\"}", newStatus);
+        ticketAuditEventService.logEvent(ticket, "STATUS_CHANGED", actor, oldStatusVal, newStatusVal, null);
 
         return ticketRepository.save(ticket);
     }
@@ -196,9 +196,9 @@ public class TicketService {
         ticket.setEscalatedLevel(oldLevel + 1);
         ticket.setUpdatedAt(LocalDateTime.now());
 
-        ticketAuditEventService.logEvent(ticket, "ESCALATED", actor,
-                "{\"escalatedLevel\":" + oldLevel + "}",
-                "{\"escalatedLevel\":" + ticket.getEscalatedLevel() + "}", null);
+        String oldLevelVal = String.format("{\"escalatedLevel\":%d}", oldLevel);
+        String newLevelVal = String.format("{\"escalatedLevel\":%d}", oldLevel + 1);
+        ticketAuditEventService.logEvent(ticket, "ESCALATED", actor, oldLevelVal, newLevelVal, null);
 
         return ticketRepository.save(ticket);
     }
@@ -209,19 +209,19 @@ public class TicketService {
 
         if (newAgentId != null) {
             User newAgent = userRepository.findById(newAgentId)
-                    .orElseThrow(() -> new InformationNotFoundException("User with id " + newAgentId + " not found."));
+                    .orElseThrow(() -> new InformationNotFoundException("Couldn't find agent with id " + newAgentId));
             ticket.setAssignedAgent(newAgent);
         }
 
         if (newTeamId != null) {
             Team newTeam = teamRepository.findById(newTeamId)
-                    .orElseThrow(() -> new InformationNotFoundException("Team with id " + newTeamId + " not found."));
+                    .orElseThrow(() -> new InformationNotFoundException("Team " + newTeamId + " not found"));
             ticket.setAssignedTeam(newTeam);
         }
 
         ticket.setUpdatedAt(LocalDateTime.now());
 
-        ticketAuditEventService.logEvent(ticket, "REASSIGNED", actor, null, null, null);
+        ticketAuditEventService.logEvent(ticket, "REASSIGNED", actor); // no detailed diff needed
 
         return ticketRepository.save(ticket);
     }

@@ -45,8 +45,12 @@ public class TicketAuditEventService {
         return ticketAuditEventRepository.findByEventType(eventType);
     }
 
+    public TicketAuditEvent logEvent(Ticket ticket, String eventType, User actor) {
+        return logEvent(ticket, eventType, actor, null, null, null);
+    }
+
     public TicketAuditEvent getEventById(Long id) {
         return ticketAuditEventRepository.findById(id)
-                .orElseThrow(() -> new InformationNotFoundException("Audit event with id " + id + " not found."));
+                .orElseThrow(() -> new InformationNotFoundException("Audit event " + id + " not found"));
     }
 }
