@@ -31,5 +31,10 @@ public class AuditTrailController {
         return ResponseEntity.ok(ticketAuditEventService.getEventsByActor(actorId));
     }
 
+    @GetMapping("/events/{eventType}")
+    public ResponseEntity<List<TicketAuditEvent>> getEventsByType(@PathVariable String eventType) {
+        return ResponseEntity.ok(ticketAuditEventService.getEventsByType(eventType));
+    }
+
 
 }
