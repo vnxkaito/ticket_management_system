@@ -109,6 +109,9 @@ public class UserService {
             var authentication = authenticationManager.authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             myUserDetails = (MyUserDetails) authentication.getPrincipal();
+            if (!myUserDetails.getActive()){
+                return ResponseEntity.ok(new LoginResponse("The account is not active"));
+            }
             final String JWT = jwtUtils.generateJwtToken(myUserDetails);
             return ResponseEntity.ok(new LoginResponse(JWT));
         } catch (Exception e) {
