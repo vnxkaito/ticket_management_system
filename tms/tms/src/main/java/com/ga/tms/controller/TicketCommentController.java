@@ -15,7 +15,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/api/tickets/{ticketId}/comments")
 public class TicketCommentController {
-    public final TicketCommentService ticketCommentService;
+    private final TicketCommentService ticketCommentService;
 
     @Autowired
     public TicketCommentController(TicketCommentService ticketCommentService){

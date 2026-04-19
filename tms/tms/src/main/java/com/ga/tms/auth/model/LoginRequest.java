@@ -12,7 +12,7 @@ public class LoginRequest {
         this.username = username;
     }
 
-    public String getPasswordhash() {
+    public String getPassword() {
         return password;
     }
 

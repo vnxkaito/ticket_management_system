@@ -55,7 +55,6 @@ public class UserService {
 
     @Transactional(rollbackOn = Exception.class)
     public User createUser(User userObject){
-        System.out.println("service calling createUser ==>");
         if (!userRepository.existsByUsername(userObject.getUsername())){
             userObject.setPasswordHash(passwordEncoder.encode(userObject.getPasswordHash()));
             User user = userRepository.save(userObject);
@@ -104,7 +103,7 @@ public class UserService {
     }
 
     public ResponseEntity<?> loginUser(LoginRequest loginRequest){
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPasswordhash());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
         try {
             var authentication = authenticationManager.authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -112,8 +111,8 @@ public class UserService {
             if (!myUserDetails.getActive()){
                 return ResponseEntity.ok(new LoginResponse("The account is not active"));
             }
-            final String JWT = jwtUtils.generateJwtToken(myUserDetails);
-            return ResponseEntity.ok(new LoginResponse(JWT));
+            final String jwt = jwtUtils.generateJwtToken(myUserDetails);
+            return ResponseEntity.ok(new LoginResponse(jwt));
         } catch (Exception e) {
             return ResponseEntity.ok(new LoginResponse("Error : user name or password is incorrect"));
         }

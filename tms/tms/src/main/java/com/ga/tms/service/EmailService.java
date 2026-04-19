@@ -1,8 +1,6 @@
 package com.ga.tms.service;
 import com.resend.*;
 import com.resend.services.emails.model.SendEmailRequest;
-import com.resend.services.emails.model.SendEmailResponse;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -24,18 +22,6 @@ public class EmailService {
                         <br>
                         """)
                 .build();
-        SendEmailResponse data = resend.emails().send(sendEmailRequest);
+        resend.emails().send(sendEmailRequest);
     }
-//    public static void main(String[] args) {
-//
-//
-//        SendEmailRequest sendEmailRequest = SendEmailRequest.builder()
-//                .from("noreply@resend.dev")
-//                .to("vnxkaito@hotmail.com")
-//                .subject("Hello World")
-//                .html("<p>Congrats on sending your <strong>first email</strong>!</p>")
-//                .build();
-//
-//        SendEmailResponse data = resend.emails().send(sendEmailRequest);
-//    }
 }

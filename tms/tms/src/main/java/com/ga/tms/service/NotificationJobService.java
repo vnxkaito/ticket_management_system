@@ -59,7 +59,7 @@ public class NotificationJobService {
                 .orElseThrow(() -> new InformationNotFoundException("Notification job " + id + " not found"));
     }
 
-    public NotificationJob MarkAsSent(Long jobId){
+    public NotificationJob markAsSent(Long jobId){
         NotificationJob job = getJobById(jobId);
         job.setStatus("SENT");
         job.setUpdatedAt(LocalDateTime.now());
