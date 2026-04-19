@@ -1,6 +1,7 @@
 package com.ga.tms.controller;
 
 import com.ga.tms.model.Team;
+import com.ga.tms.model.User;
 import com.ga.tms.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Controller
 public class TeamController {
@@ -52,6 +54,11 @@ public class TeamController {
     @DeleteMapping("/{teamId}/members/{userId}")
     public ResponseEntity<Team> removeUserFromTeam(@PathVariable Long teamId, @PathVariable Long userId) {
         return ResponseEntity.ok(teamService.removeUserFromTeam(teamId, userId));
+    }
+
+    @GetMapping("/{teamId}/members")
+    public ResponseEntity<Set<User>> getTeamMembers(@PathVariable Long teamId) {
+        return ResponseEntity.ok(teamService.getTeamMembers(teamId));
     }
 
 
