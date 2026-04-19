@@ -44,5 +44,10 @@ public class TeamController {
         return ResponseEntity.ok("Team deleted successfully.");
     }
 
+    @PutMapping("/{teamId}/members/{userId}")
+    public ResponseEntity<Team> addUserToTeam(@PathVariable Long teamId, @PathVariable Long userId) {
+        return ResponseEntity.ok(teamService.addUserToTeam(teamId, userId));
+    }
+
 
 }
