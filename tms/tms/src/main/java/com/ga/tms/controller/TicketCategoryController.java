@@ -4,6 +4,7 @@ import com.ga.tms.model.TicketCategory;
 import com.ga.tms.service.TicketCategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +20,7 @@ public class TicketCategoryController {
         this.ticketCategoryService = ticketCategoryService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<TicketCategory> createCategory(@RequestBody TicketCategory category) {
         return ResponseEntity.ok(ticketCategoryService.createCategory(category));
@@ -34,11 +36,13 @@ public class TicketCategoryController {
         return ResponseEntity.ok(ticketCategoryService.getCategoryById(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<TicketCategory> updateCategory(@PathVariable Long id, @RequestBody TicketCategory category) {
         return ResponseEntity.ok(ticketCategoryService.updateCategory(id, category));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
         ticketCategoryService.deleteCategory(id);

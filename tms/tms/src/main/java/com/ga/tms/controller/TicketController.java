@@ -6,6 +6,7 @@ import com.ga.tms.security.MyUserDetails;
 import com.ga.tms.service.TicketService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ public class TicketController {
         this.ticketService = ticketService;
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping
     public ResponseEntity<Ticket> createTicket(@RequestBody Map<String, Object> request,
                                                @AuthenticationPrincipal MyUserDetails myUserDetails) {
@@ -35,38 +37,45 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.createTicket(customerId, categoryId, subject, description));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public ResponseEntity<Ticket> getTicketById(@PathVariable Long id) {
         return ResponseEntity.ok(ticketService.getTicketById(id));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/ref/{externalRef}")
     public ResponseEntity<Ticket> getTicketByExternalRef(@PathVariable String externalRef) {
         return ResponseEntity.ok(ticketService.getTicketByExternalRef(externalRef));
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/my")
     public ResponseEntity<List<Ticket>> getMyTickets(@AuthenticationPrincipal MyUserDetails myUserDetails) {
         Long customerId = myUserDetails.getUser().getId();
         return ResponseEntity.ok(ticketService.getTicketsByCustomer(customerId));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @GetMapping("/assigned")
     public ResponseEntity<List<Ticket>> getAssignedTickets(@AuthenticationPrincipal MyUserDetails myUserDetails) {
         Long agentId = myUserDetails.getUser().getId();
         return ResponseEntity.ok(ticketService.getTicketsByAgent(agentId));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @GetMapping("/team/{teamId}")
     public ResponseEntity<List<Ticket>> getTicketsByTeam(@PathVariable Long teamId) {
         return ResponseEntity.ok(ticketService.getTicketsByTeam(teamId));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @GetMapping
     public ResponseEntity<List<Ticket>> getAllTickets() {
         return ResponseEntity.ok(ticketService.getAllTickets());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @GetMapping("/filter")
     public ResponseEntity<List<Ticket>> filterTickets(
             @RequestParam(required = false) String status,
@@ -85,6 +94,7 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.getAllTickets());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @PutMapping("/{ticketId}/claim")
     public ResponseEntity<Ticket> claimTicket(@PathVariable Long ticketId,
                                               @AuthenticationPrincipal MyUserDetails myUserDetails) {
@@ -92,6 +102,7 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.claimTicket(ticketId, agentId));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @PutMapping("/{ticketId}/assign/agent/{agentId}")
     public ResponseEntity<Ticket> assignTicketToAgent(@PathVariable Long ticketId,
                                                       @PathVariable Long agentId,
@@ -100,6 +111,7 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.assignTicketToAgent(ticketId, agentId, actor));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @PutMapping("/{ticketId}/assign/team/{teamId}")
     public ResponseEntity<Ticket> assignTicketToTeam(@PathVariable Long ticketId,
                                                      @PathVariable Long teamId,
@@ -108,6 +120,7 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.assignTicketToTeam(ticketId, teamId, actor));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @PutMapping("/{ticketId}/reassign")
     public ResponseEntity<Ticket> reassignTicket(@PathVariable Long ticketId,
                                                  @RequestBody Map<String, Long> request,
@@ -118,6 +131,7 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.reassignTicket(ticketId, newAgentId, newTeamId, actor));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @PutMapping("/{ticketId}/status")
     public ResponseEntity<Ticket> changeStatus(@PathVariable Long ticketId,
                                                @RequestBody Map<String, String> request,
@@ -127,6 +141,7 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.changeStatus(ticketId, newStatus, actor));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
     @PutMapping("/{ticketId}/escalate")
     public ResponseEntity<Ticket> escalateTicket(@PathVariable Long ticketId,
                                                  @AuthenticationPrincipal MyUserDetails myUserDetails) {

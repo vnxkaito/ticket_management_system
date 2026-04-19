@@ -3,6 +3,7 @@ package com.ga.tms.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.context.WebApplicationContext;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private MyUserDetailsService myUserDetailsService;
@@ -34,7 +36,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -48,11 +50,9 @@ public class SecurityConfiguration {
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/auth/users",
                                 "/auth/users/login",
                                 "/auth/users/register",
-                                "/auth/users/verify/**",
-                                "/api/tickets**"
+                                "/auth/users/verify/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 );

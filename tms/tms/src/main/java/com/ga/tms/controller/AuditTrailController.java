@@ -4,15 +4,16 @@ import com.ga.tms.model.TicketAuditEvent;
 import com.ga.tms.service.TicketAuditEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/api/audit")
+@PreAuthorize("hasAnyRole('ADMIN', 'AGENT')")
 public class AuditTrailController {
     private final TicketAuditEventService ticketAuditEventService;
 

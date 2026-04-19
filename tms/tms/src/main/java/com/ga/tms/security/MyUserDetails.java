@@ -3,10 +3,11 @@ package com.ga.tms.security;
 import com.ga.tms.model.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @Getter
 public class MyUserDetails implements UserDetails {
@@ -18,7 +19,12 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new HashSet<>();
+        return user.getRoles().stream()
+                .map(role -> {
+                    String name = role.getName();
+                    return new SimpleGrantedAuthority(name.startsWith("ROLE_") ? name : "ROLE_" + name);
+                })
+                .collect(Collectors.toSet());
     }
 
     @Override
