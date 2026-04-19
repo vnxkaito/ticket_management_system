@@ -26,6 +26,7 @@ public class TicketController {
     @PostMapping
     public ResponseEntity<Ticket> createTicket(@RequestBody Map<String, Object> request,
                                                @AuthenticationPrincipal MyUserDetails myUserDetails) {
+        System.out.println("Controller calling ==> createTicket()");
         Long customerId = myUserDetails.getUser().getId();
         Long categoryId = Long.valueOf(request.get("categoryId").toString());
         String subject = request.get("subject").toString();

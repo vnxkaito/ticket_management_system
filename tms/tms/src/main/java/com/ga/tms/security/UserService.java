@@ -7,6 +7,7 @@ import com.ga.tms.exceptions.InvalidTokenException;
 import com.ga.tms.model.User;
 import com.ga.tms.model.VerificationToken;
 import com.ga.tms.service.EmailService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -52,6 +53,7 @@ public class UserService {
         this.emailService = emailService;
     }
 
+    @Transactional(rollbackOn = Exception.class)
     public User createUser(User userObject){
         System.out.println("service calling createUser ==>");
         if (!userRepository.existsByUsername(userObject.getUsername())){
