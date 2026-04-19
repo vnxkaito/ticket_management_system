@@ -1,11 +1,17 @@
 package com.ga.tms.service;
 import com.resend.*;
 import com.resend.services.emails.model.SendEmailRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
-    Resend resend = new Resend("re_RjcTSRQq_HYfdaCLWoRV7v5EGHcbHcWXV");
+
+    private final Resend resend;
+
+    public EmailService(@Value("${resend.api-key}") String apiKey) {
+        this.resend = new Resend(apiKey);
+    }
 
     public void sendVerificationEmail(String to, String verificationLink){
         SendEmailRequest sendEmailRequest = SendEmailRequest.builder()
