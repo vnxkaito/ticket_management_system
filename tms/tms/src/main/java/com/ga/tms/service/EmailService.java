@@ -30,4 +30,23 @@ public class EmailService {
                 .build();
         resend.emails().send(sendEmailRequest);
     }
+
+    public void sendPasswordResetEmail(String to, String resetLink) {
+        SendEmailRequest sendEmailRequest = SendEmailRequest.builder()
+                .from("noreply@resend.dev")
+                .to(to)
+                .subject("Reset your password")
+                .html("""
+                        You requested a password reset for your TMS account.<br>
+                        <br>
+                        Click the link below to reset your password. This link expires in 1 hour.<br>
+                        <br><a href=
+                        """ + resetLink + """
+                         ><b>Reset Password</b></a>
+                        <br>
+                        If you did not request this, please ignore this email.
+                        """)
+                .build();
+        resend.emails().send(sendEmailRequest);
+    }
 }

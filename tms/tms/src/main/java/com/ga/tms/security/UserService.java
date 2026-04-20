@@ -3,7 +3,9 @@ package com.ga.tms.security;
 import com.ga.tms.auth.model.LoginRequest;
 import com.ga.tms.auth.model.LoginResponse;
 import com.ga.tms.exceptions.InformationExistException;
+import com.ga.tms.exceptions.InformationNotFoundException;
 import com.ga.tms.exceptions.InvalidTokenException;
+import com.ga.tms.model.PasswordResetToken;
 import com.ga.tms.model.User;
 import com.ga.tms.model.VerificationToken;
 import com.ga.tms.service.EmailService;
@@ -26,6 +28,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
+    private final PasswordResetTokenRepository passwordResetTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
@@ -42,6 +45,7 @@ public class UserService {
                        @Lazy AuthenticationManager authenticationManager,
                        @Lazy MyUserDetails myUserDetails,
                        @Lazy VerificationTokenRepository verificationTokenRepository,
+                       @Lazy PasswordResetTokenRepository passwordResetTokenRepository,
                        @Lazy EmailService emailService
     ){
         this.userRepository = userRepository;
@@ -50,6 +54,7 @@ public class UserService {
         this.authenticationManager = authenticationManager;
         this.myUserDetails = myUserDetails;
         this.verificationTokenRepository = verificationTokenRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
         this.emailService = emailService;
     }
 
@@ -120,5 +125,91 @@ public class UserService {
 
     public String generateVerificationLink(String token){
         return "http://localhost:" + portNumber + "/auth/users/verify/" + token;
+    }
+
+    public String generatePasswordResetLink(String token) {
+        return "http://localhost:" + portNumber + "/auth/users/reset-password?token=" + token;
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public void forgotPassword(String email) {
+        User user = userRepository.findUserByEmail(email);
+        if (user == null) {
+            return;
+        }
+        passwordResetTokenRepository.findByUser_Id(user.getId())
+                .forEach(passwordResetTokenRepository::delete);
+
+        PasswordResetToken prt = new PasswordResetToken();
+        prt.setToken(UUID.randomUUID().toString());
+        prt.setUser(user);
+        prt.setExpiryDate(LocalDateTime.now().plusHours(1));
+        passwordResetTokenRepository.save(prt);
+
+        emailService.sendPasswordResetEmail(user.getEmail(), generatePasswordResetLink(prt.getToken()));
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken prt = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(() -> new InvalidTokenException("Invalid token"));
+
+        if (prt.isUsed()) {
+            throw new InvalidTokenException("Token is already used");
+        }
+        if (prt.getExpiryDate().isBefore(LocalDateTime.now())) {
+            throw new InvalidTokenException("Token is expired");
+        }
+
+        User user = prt.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        prt.setUsed(true);
+
+        userRepository.save(user);
+        passwordResetTokenRepository.save(prt);
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InformationNotFoundException("User not found"));
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Current password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public User updateProfile(Long userId, String fullName, String email) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InformationNotFoundException("User not found"));
+
+        if (fullName != null) {
+            user.setFullName(fullName);
+        }
+        if (email != null) {
+            user.setEmail(email);
+        }
+
+        return userRepository.save(user);
+    }
+
+    @Transactional(rollbackOn = Exception.class)
+    public void uploadProfilePicture(Long userId, byte[] picture) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InformationNotFoundException("User not found"));
+
+        user.setProfilePicture(picture);
+        userRepository.save(user);
+    }
+
+    public byte[] getProfilePicture(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InformationNotFoundException("User not found"));
+
+        return user.getProfilePicture();
     }
 }
