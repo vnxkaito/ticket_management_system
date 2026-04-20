@@ -44,9 +44,6 @@ public class TicketCategoryService {
         TicketCategory category = getCategoryById(id);
         category.setName(categoryDetails.getName());
         category.setDefaultPriority(categoryDetails.getDefaultPriority());
-        category.setFirstResponseSlaMinutes(categoryDetails.getFirstResponseSlaMinutes());
-        category.setResolutionSlaMinutes(categoryDetails.getResolutionSlaMinutes());
-        category.setRoutingStrategy(categoryDetails.getRoutingStrategy());
         return ticketCategoryRepository.save(category);
     }
 

@@ -18,9 +18,6 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "external_ref", nullable = false)
-    private String externalRef;
-
     @Column(nullable = false)
     private String subject;
 
@@ -47,15 +44,6 @@ public class Ticket {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assigned_team_id")
     private Team assignedTeam;
-
-    @Column(name = "first_response_due_at")
-    private LocalDateTime firstResponseDueAt;
-
-    @Column(name = "resolution_due_at")
-    private LocalDateTime resolutionDueAt;
-
-    @Column(name = "first_responded_at")
-    private LocalDateTime firstRespondedAt;
 
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;

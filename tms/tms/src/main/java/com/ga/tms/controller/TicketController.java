@@ -44,12 +44,6 @@ public class TicketController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/ref/{externalRef}")
-    public ResponseEntity<Ticket> getTicketByExternalRef(@PathVariable String externalRef) {
-        return ResponseEntity.ok(ticketService.getTicketByExternalRef(externalRef));
-    }
-
-    @PreAuthorize("isAuthenticated()")
     @GetMapping("/my")
     public ResponseEntity<List<Ticket>> getMyTickets(@AuthenticationPrincipal MyUserDetails myUserDetails) {
         Long customerId = myUserDetails.getUser().getId();

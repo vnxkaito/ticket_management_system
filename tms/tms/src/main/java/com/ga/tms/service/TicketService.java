@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class TicketService {
@@ -22,22 +21,15 @@ public class TicketService {
     private final TicketCategoryRepository ticketCategoryRepository;
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
-    private final SlaEventService slaEventService;
-    private final TicketAuditEventService ticketAuditEventService;
-
     @Autowired
     public TicketService(TicketRepository ticketRepository,
                          TicketCategoryRepository ticketCategoryRepository,
                          UserRepository userRepository,
-                         TeamRepository teamRepository,
-                         SlaEventService slaEventService,
-                         TicketAuditEventService ticketAuditEventService) {
+                         TeamRepository teamRepository) {
         this.ticketRepository = ticketRepository;
         this.ticketCategoryRepository = ticketCategoryRepository;
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
-        this.slaEventService = slaEventService;
-        this.ticketAuditEventService = ticketAuditEventService;
     }
 
     @Transactional
@@ -50,7 +42,6 @@ public class TicketService {
         LocalDateTime now = LocalDateTime.now();
 
         Ticket ticket = Ticket.builder()
-                .externalRef("TKT-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase())
                 .subject(subject)
                 .description(description)
                 .customer(customer)
@@ -59,18 +50,11 @@ public class TicketService {
                 .priority(category.getDefaultPriority())
                 .escalatedLevel(0)
                 .version(0)
-                .firstResponseDueAt(now.plusMinutes(category.getFirstResponseSlaMinutes()))
-                .resolutionDueAt(now.plusMinutes(category.getResolutionSlaMinutes()))
                 .createdAt(now)
                 .updatedAt(now)
                 .build();
 
         Ticket savedTicket = ticketRepository.save(ticket);
-
-        slaEventService.createSlaEvent(savedTicket, "FIRST_RESPONSE", savedTicket.getFirstResponseDueAt());
-        slaEventService.createSlaEvent(savedTicket, "RESOLUTION", savedTicket.getResolutionDueAt());
-
-        ticketAuditEventService.logEvent(savedTicket, "CREATED", customer); // no diffs on creation
 
         return savedTicket;
     }
@@ -78,11 +62,6 @@ public class TicketService {
     public Ticket getTicketById(Long id) {
         return ticketRepository.findById(id)
                 .orElseThrow(() -> new InformationNotFoundException("Ticket " + id + " not found"));
-    }
-
-    public Ticket getTicketByExternalRef(String externalRef) {
-        return ticketRepository.findByExternalRef(externalRef)
-                .orElseThrow(() -> new InformationNotFoundException("No ticket found for ref: " + externalRef));
     }
 
     public List<Ticket> getTicketsByCustomer(Long customerId) {
@@ -123,13 +102,8 @@ public class TicketService {
         User agent = userRepository.findById(agentId)
                 .orElseThrow(() -> new InformationNotFoundException("Agent not found: " + agentId));
 
-        String oldAgent = ticket.getAssignedAgent() != null ? ticket.getAssignedAgent().getId().toString() : "null";
         ticket.setAssignedAgent(agent);
         ticket.setUpdatedAt(LocalDateTime.now());
-
-        String oldAgentVal = String.format("{\"assignedAgentId\":%s}", oldAgent);
-        String newAgentVal = String.format("{\"assignedAgentId\":%d}", agentId);
-        ticketAuditEventService.logEvent(ticket, "ASSIGNED_AGENT", actor, oldAgentVal, newAgentVal, null);
 
         return ticketRepository.save(ticket);
     }
@@ -140,13 +114,8 @@ public class TicketService {
         Team team = teamRepository.findById(teamId)
                 .orElseThrow(() -> new InformationNotFoundException("No team with id " + teamId));
 
-        String oldTeam = ticket.getAssignedTeam() != null ? ticket.getAssignedTeam().getId().toString() : "null";
         ticket.setAssignedTeam(team);
         ticket.setUpdatedAt(LocalDateTime.now());
-
-        String oldTeamVal = String.format("{\"assignedTeamId\":%s}", oldTeam);
-        String newTeamVal = String.format("{\"assignedTeamId\":%d}", teamId);
-        ticketAuditEventService.logEvent(ticket, "ASSIGNED_TEAM", actor, oldTeamVal, newTeamVal, null);
 
         return ticketRepository.save(ticket);
     }
@@ -164,27 +133,18 @@ public class TicketService {
         ticket.setAssignedAgent(agent);
         ticket.setUpdatedAt(LocalDateTime.now());
 
-        String claimVal = String.format("{\"assignedAgentId\":%d}", agentId);
-        ticketAuditEventService.logEvent(ticket, "CLAIMED", agent, null, claimVal, null);
-
         return ticketRepository.save(ticket);
     }
 
     @Transactional
     public Ticket changeStatus(Long ticketId, String newStatus, User actor) {
         Ticket ticket = getTicketById(ticketId);
-        String oldStatus = ticket.getStatus();
-
         ticket.setStatus(newStatus);
         ticket.setUpdatedAt(LocalDateTime.now());
 
         if ("RESOLVED".equals(newStatus)) {
             ticket.setResolvedAt(LocalDateTime.now());
         }
-
-        String oldStatusVal = String.format("{\"status\":\"%s\"}", oldStatus);
-        String newStatusVal = String.format("{\"status\":\"%s\"}", newStatus);
-        ticketAuditEventService.logEvent(ticket, "STATUS_CHANGED", actor, oldStatusVal, newStatusVal, null);
 
         return ticketRepository.save(ticket);
     }
@@ -195,10 +155,6 @@ public class TicketService {
         int oldLevel = ticket.getEscalatedLevel();
         ticket.setEscalatedLevel(oldLevel + 1);
         ticket.setUpdatedAt(LocalDateTime.now());
-
-        String oldLevelVal = String.format("{\"escalatedLevel\":%d}", oldLevel);
-        String newLevelVal = String.format("{\"escalatedLevel\":%d}", oldLevel + 1);
-        ticketAuditEventService.logEvent(ticket, "ESCALATED", actor, oldLevelVal, newLevelVal, null);
 
         return ticketRepository.save(ticket);
     }
@@ -221,19 +177,7 @@ public class TicketService {
 
         ticket.setUpdatedAt(LocalDateTime.now());
 
-        ticketAuditEventService.logEvent(ticket, "REASSIGNED", actor); // no detailed diff needed
-
         return ticketRepository.save(ticket);
     }
 
-    @Transactional
-    public Ticket recordFirstResponse(Long ticketId) {
-        Ticket ticket = getTicketById(ticketId);
-        if (ticket.getFirstRespondedAt() == null) {
-            ticket.setFirstRespondedAt(LocalDateTime.now());
-            ticket.setUpdatedAt(LocalDateTime.now());
-            return ticketRepository.save(ticket);
-        }
-        return ticket;
-    }
 }

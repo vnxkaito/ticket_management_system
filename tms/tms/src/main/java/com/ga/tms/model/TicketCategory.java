@@ -21,13 +21,4 @@ public class TicketCategory {
 
     @Column(name = "default_priority", nullable = false)
     private String defaultPriority;
-
-    @Column(name = "first_response_sla_minutes", nullable = false)
-    private Integer firstResponseSlaMinutes;
-
-    @Column(name = "resolution_sla_minutes", nullable = false)
-    private Integer resolutionSlaMinutes;
-
-    @Column(name = "routing_strategy", nullable = false)
-    private String routingStrategy;
 }
