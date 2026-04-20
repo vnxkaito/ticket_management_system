@@ -22,7 +22,11 @@ public class MyUserDetails implements UserDetails {
         return user.getRoles().stream()
                 .map(role -> {
                     String name = role.getName();
-                    return new SimpleGrantedAuthority(name.startsWith("ROLE_") ? name : "ROLE_" + name);
+                    if (name.startsWith("ROLE_")) {
+                        return new SimpleGrantedAuthority(name);
+                    } else {
+                        return new SimpleGrantedAuthority("ROLE_" + name);
+                    }
                 })
                 .collect(Collectors.toSet());
     }
