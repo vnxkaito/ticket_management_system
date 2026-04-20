@@ -21,15 +21,19 @@ public class TicketService {
     private final TicketCategoryRepository ticketCategoryRepository;
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
+    private final TicketLockManager ticketLockManager;
+
     @Autowired
     public TicketService(TicketRepository ticketRepository,
                          TicketCategoryRepository ticketCategoryRepository,
                          UserRepository userRepository,
-                         TeamRepository teamRepository) {
+                         TeamRepository teamRepository,
+                         TicketLockManager ticketLockManager) {
         this.ticketRepository = ticketRepository;
         this.ticketCategoryRepository = ticketCategoryRepository;
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
+        this.ticketLockManager = ticketLockManager;
     }
 
     @Transactional
@@ -122,41 +126,59 @@ public class TicketService {
 
     @Transactional
     public Ticket claimTicket(Long ticketId, Long agentId) {
-        Ticket ticket = getTicketById(ticketId);
-        if (ticket.getAssignedAgent() != null) {
-            throw new InformationExistException("Ticket is already assigned to an agent.");
+        ticketLockManager.acquire(ticketId);
+        try {
+            Ticket ticket = getTicketById(ticketId);
+            if (ticket.getAssignedAgent() != null) {
+                throw new InformationExistException("Ticket is already assigned to an agent.");
+            }
+
+            User agent = userRepository.findById(agentId)
+                    .orElseThrow(() -> new InformationNotFoundException("Agent " + agentId + " doesn't exist"));
+
+            ticket.setAssignedAgent(agent);
+            ticket.setUpdatedAt(LocalDateTime.now());
+
+            return ticketRepository.save(ticket);
+        } finally {
+            ticketLockManager.release(ticketId);
         }
-
-        User agent = userRepository.findById(agentId)
-                .orElseThrow(() -> new InformationNotFoundException("Agent " + agentId + " doesn't exist"));
-
-        ticket.setAssignedAgent(agent);
-        ticket.setUpdatedAt(LocalDateTime.now());
-
-        return ticketRepository.save(ticket);
     }
 
     @Transactional
     public Ticket changeStatus(Long ticketId, String newStatus, User actor) {
-        Ticket ticket = getTicketById(ticketId);
-        ticket.setStatus(newStatus);
-        ticket.setUpdatedAt(LocalDateTime.now());
+        ticketLockManager.acquire(ticketId);
+        try {
+            Ticket ticket = getTicketById(ticketId);
+            ticket.setStatus(newStatus);
+            ticket.setUpdatedAt(LocalDateTime.now());
 
-        if ("RESOLVED".equals(newStatus)) {
-            ticket.setResolvedAt(LocalDateTime.now());
+            if ("RESOLVED".equals(newStatus)) {
+                ticket.setResolvedAt(LocalDateTime.now());
+            }
+
+            return ticketRepository.save(ticket);
+        } finally {
+            ticketLockManager.release(ticketId);
         }
-
-        return ticketRepository.save(ticket);
     }
 
     @Transactional
     public Ticket escalateTicket(Long ticketId, User actor) {
-        Ticket ticket = getTicketById(ticketId);
-        int oldLevel = ticket.getEscalatedLevel();
-        ticket.setEscalatedLevel(oldLevel + 1);
-        ticket.setUpdatedAt(LocalDateTime.now());
+        ticketLockManager.acquire(ticketId);
+        try {
+            Ticket ticket = getTicketById(ticketId);
+            if ("RESOLVED".equals(ticket.getStatus())) {
+                throw new IllegalStateException("Cannot escalate a resolved ticket.");
+            }
+            int oldLevel = ticket.getEscalatedLevel();
+            ticket.setEscalatedLevel(oldLevel + 1);
+            ticket.setUpdatedAt(LocalDateTime.now());
 
-        return ticketRepository.save(ticket);
+            return ticketRepository.save(ticket);
+        } finally {
+            ticketLockManager.release(ticketId);
+        }
     }
 
     @Transactional
