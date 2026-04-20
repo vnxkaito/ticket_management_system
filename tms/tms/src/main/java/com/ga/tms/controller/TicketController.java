@@ -148,4 +148,11 @@ public class TicketController {
         User actor = myUserDetails.getUser();
         return ResponseEntity.ok(ticketService.escalateTicket(ticketId, actor));
     }
+
+    @PreAuthorize("hasRole('" + Roles.ADMIN + "')")
+    @DeleteMapping("/{ticketId}")
+    public ResponseEntity<String> deleteTicket(@PathVariable Long ticketId) {
+        ticketService.deleteTicket(ticketId);
+        return ResponseEntity.ok("Ticket deleted successfully.");
+    }
 }

@@ -8,4 +8,5 @@ import java.util.List;
 public interface TicketCommentRepository extends JpaRepository<TicketComment, Long> {
     List<TicketComment> findByTicketId(Long ticketId);
     List<TicketComment> findByTicketIdAndInternalOnly(Long ticketId, Boolean internalOnly);
+    void deleteByTicketId(Long ticketId);
 }

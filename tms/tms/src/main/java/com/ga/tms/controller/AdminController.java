@@ -56,4 +56,22 @@ public class AdminController {
     public ResponseEntity<User> removeRoleFromUser(@PathVariable Long userId, @PathVariable Long roleId) {
         return ResponseEntity.ok(roleService.removeRoleFromUser(userId, roleId));
     }
+
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InformationNotFoundException("User with id " + userId + " not found."));
+
+        boolean isAdmin = user.getRoles().stream()
+                .anyMatch(role -> Roles.ADMIN.equals(role.getName()));
+
+        if (isAdmin) {
+            user.setActive(false);
+            userRepository.save(user);
+            return ResponseEntity.ok("Admin user deactivated (soft delete).");
+        } else {
+            userRepository.delete(user);
+            return ResponseEntity.ok("User deleted successfully.");
+        }
+    }
 }

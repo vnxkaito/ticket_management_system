@@ -69,4 +69,19 @@ public class TicketCommentController {
     public ResponseEntity<TicketComment> getCommentById(@PathVariable Long commentId){
         return ResponseEntity.ok(ticketCommentService.getCommentById(commentId));
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/{commentId}")
+    public ResponseEntity<TicketComment> updateComment(@PathVariable Long commentId,
+                                                       @RequestBody Map<String, Object> request) {
+        String newBody = request.get(FIELD_BODY).toString();
+        return ResponseEntity.ok(ticketCommentService.updateComment(commentId, newBody));
+    }
+
+    @PreAuthorize("hasAnyRole('" + Roles.ADMIN + "', '" + Roles.AGENT + "')")
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<String> deleteComment(@PathVariable Long commentId) {
+        ticketCommentService.deleteComment(commentId);
+        return ResponseEntity.ok("Comment deleted successfully.");
+    }
 }

@@ -4,6 +4,7 @@ import com.ga.tms.exceptions.InformationExistException;
 import com.ga.tms.exceptions.InformationNotFoundException;
 import com.ga.tms.model.*;
 import com.ga.tms.repository.TicketCategoryRepository;
+import com.ga.tms.repository.TicketCommentRepository;
 import com.ga.tms.repository.TicketRepository;
 import com.ga.tms.repository.TeamRepository;
 import com.ga.tms.security.UserRepository;
@@ -22,18 +23,21 @@ public class TicketService {
     private final UserRepository userRepository;
     private final TeamRepository teamRepository;
     private final TicketLockManager ticketLockManager;
+    private final TicketCommentRepository ticketCommentRepository;
 
     @Autowired
     public TicketService(TicketRepository ticketRepository,
                          TicketCategoryRepository ticketCategoryRepository,
                          UserRepository userRepository,
                          TeamRepository teamRepository,
-                         TicketLockManager ticketLockManager) {
+                         TicketLockManager ticketLockManager,
+                         TicketCommentRepository ticketCommentRepository) {
         this.ticketRepository = ticketRepository;
         this.ticketCategoryRepository = ticketCategoryRepository;
         this.userRepository = userRepository;
         this.teamRepository = teamRepository;
         this.ticketLockManager = ticketLockManager;
+        this.ticketCommentRepository = ticketCommentRepository;
     }
 
     @Transactional
@@ -179,6 +183,13 @@ public class TicketService {
         } finally {
             ticketLockManager.release(ticketId);
         }
+    }
+
+    @Transactional
+    public void deleteTicket(Long ticketId) {
+        getTicketById(ticketId);
+        ticketCommentRepository.deleteByTicketId(ticketId);
+        ticketRepository.deleteById(ticketId);
     }
 
     @Transactional

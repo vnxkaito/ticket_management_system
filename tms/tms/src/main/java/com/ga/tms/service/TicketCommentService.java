@@ -70,4 +70,17 @@ public class TicketCommentService {
         return ticketCommentRepository.findById(id)
                 .orElseThrow(() -> new InformationNotFoundException("Comment " + id + " doesn't exist"));
     }
+
+    @Transactional
+    public TicketComment updateComment(Long commentId, String newBody) {
+        TicketComment comment = getCommentById(commentId);
+        comment.setBody(newBody);
+        return ticketCommentRepository.save(comment);
+    }
+
+    @Transactional
+    public void deleteComment(Long commentId) {
+        TicketComment comment = getCommentById(commentId);
+        ticketCommentRepository.delete(comment);
+    }
 }
