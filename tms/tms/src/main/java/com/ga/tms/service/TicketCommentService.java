@@ -20,17 +20,14 @@ public class TicketCommentService {
     private final TicketCommentRepository ticketCommentRepository;
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
-    private final TicketAuditEventService ticketAuditEventService;
 
     @Autowired
     public TicketCommentService(TicketCommentRepository ticketCommentRepository,
                                 TicketRepository ticketRepository,
-                                UserRepository userRepository,
-                                TicketAuditEventService ticketAuditEventService) {
+                                UserRepository userRepository) {
         this.ticketCommentRepository = ticketCommentRepository;
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
-        this.ticketAuditEventService = ticketAuditEventService;
     }
 
     @Transactional
@@ -52,9 +49,7 @@ public class TicketCommentService {
         TicketComment savedComment = ticketCommentRepository.save(comment);
 
         ticket.setUpdatedAt(LocalDateTime.now());
-
-        String newVal = String.format("{\"commentId\":%d,\"internalOnly\":%b}", savedComment.getId(), internalOnly);
-        ticketAuditEventService.logEvent(ticket, "COMMENT_ADDED", author, null, newVal, null);
+        ticketRepository.save(ticket);
 
         return savedComment;
     }

@@ -56,7 +56,7 @@ public class UserService {
     @Transactional(rollbackOn = Exception.class)
     public User createUser(User userObject){
         if (!userRepository.existsByUsername(userObject.getUsername())){
-            userObject.setPasswordHash(passwordEncoder.encode(userObject.getPasswordHash()));
+            userObject.setPassword(passwordEncoder.encode(userObject.getPassword()));
             User user = userRepository.save(userObject);
             user.setActive(false);
 
