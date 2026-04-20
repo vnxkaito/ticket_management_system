@@ -52,7 +52,9 @@ public class SecurityConfiguration {
                         .requestMatchers(
                                 "/auth/users/login",
                                 "/auth/users/register",
-                                "/auth/users/verify/**"
+                                "/auth/users/verify/**",
+                                "/auth/users/forgot-password",
+                                "/auth/users/reset-password"
                         ).permitAll()
                         .anyRequest().authenticated()
                 );

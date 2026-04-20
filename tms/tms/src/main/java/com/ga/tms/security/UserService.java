@@ -62,8 +62,9 @@ public class UserService {
     public User createUser(User userObject){
         if (!userRepository.existsByUsername(userObject.getUsername())){
             userObject.setPassword(passwordEncoder.encode(userObject.getPassword()));
+            userObject.setActive(false);
+            userObject.setCreatedAt(LocalDateTime.now());
             User user = userRepository.save(userObject);
-            user.setActive(false);
 
             VerificationToken vt = new VerificationToken();
             vt.setToken(UUID.randomUUID().toString());
@@ -107,7 +108,7 @@ public class UserService {
         return userRepository.findUserByUsername(username);
     }
 
-    public ResponseEntity<?> loginUser(LoginRequest loginRequest){
+    public ResponseEntity<LoginResponse> loginUser(LoginRequest loginRequest){
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
         try {
             var authentication = authenticationManager.authenticate(authenticationToken);

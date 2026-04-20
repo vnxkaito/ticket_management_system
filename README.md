@@ -1,8 +1,66 @@
 # Ticket Management System
 
+### API Endpoints
+
+| Method | Endpoint | Access | Description |
+|---|---|---|---|
+| POST | /auth/users/register | Public | Register a new user |
+| POST | /auth/users/login | Public | Login and receive JWT |
+| GET | /auth/users/verify/{token} | Public | Verify email address |
+| POST | /auth/users/forgot-password | Public | Request password reset email |
+| POST | /auth/users/reset-password | Public | Reset password using token |
+| PUT | /auth/users/change-password | Authenticated | Change current password |
+| PUT | /auth/users/profile | Authenticated | Update profile |
+| POST | /auth/users/profile/picture | Authenticated | Upload profile picture |
+| GET | /auth/users/profile/picture | Authenticated | Get profile picture |
+| GET | /api/admin/users | ADMIN | Get all users |
+| PUT | /api/admin/users/{userId}/activate | ADMIN | Activate a user |
+| PUT | /api/admin/users/{userId}/deactivate | ADMIN | Deactivate a user |
+| PUT | /api/admin/users/{userId}/roles/{roleId} | ADMIN | Assign role to user |
+| DELETE | /api/admin/users/{userId}/roles/{roleId} | ADMIN | Remove role from user |
+| DELETE | /api/admin/users/{userId} | ADMIN | Delete user (soft delete if ADMIN) |
+| POST | /api/roles | ADMIN | Create a role |
+| GET | /api/roles | ADMIN | Get all roles |
+| GET | /api/roles/{id} | ADMIN | Get role by ID |
+| PUT | /api/roles/{id} | ADMIN | Update a role |
+| DELETE | /api/roles/{id} | ADMIN | Delete a role |
+| POST | /api/teams | ADMIN | Create a team |
+| GET | /api/teams | ADMIN, AGENT | Get all teams |
+| GET | /api/teams/{id} | ADMIN, AGENT | Get team by ID |
+| PUT | /api/teams/{id} | ADMIN | Update a team |
+| DELETE | /api/teams/{id} | ADMIN | Delete a team |
+| PUT | /api/teams/{teamId}/members/{userId} | ADMIN | Add user to team |
+| DELETE | /api/teams/{teamId}/members/{userId} | ADMIN | Remove user from team |
+| GET | /api/teams/{teamId}/members | ADMIN, AGENT | Get team members |
+| POST | /api/categories | ADMIN | Create a category |
+| GET | /api/categories | Public | Get all categories |
+| GET | /api/categories/{id} | Public | Get category by ID |
+| PUT | /api/categories/{id} | ADMIN | Update a category |
+| DELETE | /api/categories/{id} | ADMIN | Delete a category |
+| POST | /api/tickets | Authenticated | Create a ticket |
+| GET | /api/tickets | ADMIN, AGENT | Get all tickets |
+| GET | /api/tickets/{id} | Authenticated | Get ticket by ID |
+| GET | /api/tickets/my | Authenticated | Get current user's tickets |
+| GET | /api/tickets/assigned | ADMIN, AGENT | Get tickets assigned to current agent |
+| GET | /api/tickets/team/{teamId} | ADMIN, AGENT | Get tickets by team |
+| GET | /api/tickets/filter | ADMIN, AGENT | Filter tickets |
+| PUT | /api/tickets/{ticketId}/claim | ADMIN, AGENT | Claim a ticket |
+| PUT | /api/tickets/{ticketId}/assign/agent/{agentId} | ADMIN, AGENT | Assign ticket to agent |
+| PUT | /api/tickets/{ticketId}/assign/team/{teamId} | ADMIN, AGENT | Assign ticket to team |
+| PUT | /api/tickets/{ticketId}/reassign | ADMIN, AGENT | Reassign ticket |
+| PUT | /api/tickets/{ticketId}/status | ADMIN, AGENT | Change ticket status |
+| PUT | /api/tickets/{ticketId}/escalate | ADMIN, AGENT | Escalate a ticket |
+| DELETE | /api/tickets/{ticketId} | ADMIN | Delete a ticket |
+| POST | /api/tickets/{ticketId}/comments | Authenticated | Add a comment |
+| GET | /api/tickets/{ticketId}/comments | ADMIN, AGENT | Get all comments |
+| GET | /api/tickets/{ticketId}/comments/public | Authenticated | Get public comments |
+| GET | /api/tickets/{ticketId}/comments/internal | ADMIN, AGENT | Get internal comments |
+| GET | /api/tickets/{ticketId}/comments/{commentId} | Authenticated | Get comment by ID |
+| PUT | /api/tickets/{ticketId}/comments/{commentId} | Authenticated | Update a comment |
+| DELETE | /api/tickets/{ticketId}/comments/{commentId} | ADMIN, AGENT | Delete a comment |
+
 ### project overview
 A ticket management system for customer support. An end user will raise a ticket which will be resolved by a support team.
-
 
 ## Authentication
 #### Customer
@@ -88,6 +146,5 @@ A ticket management system for customer support. An end user will raise a ticket
 
 
 ---
-
 # ERD
 ![ERD](images/ERD.png)

@@ -30,7 +30,7 @@ public class User {
     private String password;
 
     @Column(nullable = false)
-    private Boolean active;
+    private boolean active;
 
     @Column(name = "full_name")
     private String fullName;
