@@ -1,5 +1,13 @@
 # Ticket Management System
 
+## Seeded Accounts (to be used for testing)
+
+| Role | Username | Password | Email |
+|---|---|---|---|
+| ADMIN | admin | 12341234 | admin@tms.com |
+| AGENT | agent | 12341234 | agent@tms.com |
+| CUSTOMER | customer | 12341234 | customer@tms.com |
+
 ### API Endpoints
 
 | Method | Endpoint | Access | Description |

@@ -39,6 +39,8 @@ public class DataLoader implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         seedRoles();
         seedAdminUser();
+        seedAgentUser();
+        seedCustomerUser();
         seedCategories();
     }
 
@@ -58,7 +60,7 @@ public class DataLoader implements ApplicationRunner {
             User admin = User.builder()
                     .username("admin")
                     .email("admin@tms.com")
-                    .password(passwordEncoder.encode("Admin@123"))
+                    .password(passwordEncoder.encode("12341234"))
                     .active(true)
                     .fullName("System Admin")
                     .createdAt(LocalDateTime.now())
@@ -67,6 +69,46 @@ public class DataLoader implements ApplicationRunner {
                     .build();
 
             userRepository.save(admin);
+        }
+    }
+
+    private void seedAgentUser() {
+        if (!userRepository.existsByUsername("agent")) {
+            Role agentRole = roleRepository.findByName("AGENT")
+                    .orElseThrow(() -> new RuntimeException("AGENT role not found during seeding"));
+
+            User agent = User.builder()
+                    .username("agent")
+                    .email("agent@tms.com")
+                    .password(passwordEncoder.encode("12341234"))
+                    .active(true)
+                    .fullName("Support Agent")
+                    .createdAt(LocalDateTime.now())
+                    .roles(new HashSet<>(Set.of(agentRole)))
+                    .teams(new HashSet<>())
+                    .build();
+
+            userRepository.save(agent);
+        }
+    }
+
+    private void seedCustomerUser() {
+        if (!userRepository.existsByUsername("customer")) {
+            Role customerRole = roleRepository.findByName("CUSTOMER")
+                    .orElseThrow(() -> new RuntimeException("CUSTOMER role not found during seeding"));
+
+            User customer = User.builder()
+                    .username("customer")
+                    .email("customer@tms.com")
+                    .password(passwordEncoder.encode("12341234"))
+                    .active(true)
+                    .fullName("Demo Customer")
+                    .createdAt(LocalDateTime.now())
+                    .roles(new HashSet<>(Set.of(customerRole)))
+                    .teams(new HashSet<>())
+                    .build();
+
+            userRepository.save(customer);
         }
     }
 
