@@ -35,8 +35,7 @@ public class User {
     @Column(name = "full_name")
     private String fullName;
 
-    @Lob
-    @Column(name = "profile_picture")
+    @Column(name = "profile_picture", columnDefinition = "bytea")
     private byte[] profilePicture;
 
     @Column(name = "created_at", nullable = false)
